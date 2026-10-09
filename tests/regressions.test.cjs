@@ -218,6 +218,45 @@ test('battle uses shared addition settings and preserves multiplication and mixe
     });
 });
 
+test('battle shuffles questions while keeping only the selected multiplication tables', () => {
+    const f = fixture('js/utils/array-utils.js', 'js/utils/question-generator.js', 'js/core/game.js');
+    f.run(`Math.random = () => 0; playerProfile.settings.operation = 'multiply';`);
+    for (const tables of [[7], [7, 9]]) {
+        f.run(`gameState.selectedTables = ${JSON.stringify(tables)};`);
+        const questions = Array.from(f.run('generateQuestions()'));
+        assert.equal(questions.length, tables.length * 20);
+        questions.forEach(q => {
+            assert.ok(tables.includes(q.num1));
+            assert.equal(q.answer, q.num1 * q.num2);
+        });
+        tables.forEach(table => assert.equal(questions.filter(q => q.num1 === table).length, 20));
+        assert.notDeepEqual(questions.slice(0, 10).map(q => q.num2), Array.from({ length: 10 }, (_, i) => i + 1));
+    }
+});
+
+test('mixed battle shuffles within operations before alternating questions', () => {
+    const f = fixture('js/utils/array-utils.js', 'js/utils/question-generator.js', 'js/core/game.js');
+    f.run(`Math.random = () => 0; playerProfile.settings.operation = 'multiply';
+        gameState.selectedTables = [{ table: 7 }, { min: 1, max: 5 }];`);
+    const questions = Array.from(f.run('generateQuestions()'));
+    assert.equal(questions.length, 40);
+    questions.forEach((q, i) => assert.equal(q.operation, i % 2 === 0 ? 'multiply' : 'add'));
+    const multiplication = questions.filter(q => q.operation === 'multiply');
+    assert.ok(multiplication.every(q => q.num1 === 7));
+    assert.notDeepEqual(multiplication.slice(0, 10).map(q => q.num2), Array.from({ length: 10 }, (_, i) => i + 1));
+});
+
+test('practice shuffles the chosen table and retains every factor from 1 to 20', () => {
+    const f = fixture('js/utils/array-utils.js', 'js/utils/question-generator.js', 'js/features/game-modes.js');
+    f.run('Math.random = () => 0;');
+    const questions = Array.from(f.run("practiceMode.startPractice(7, 'multiply')"));
+    const factors = questions.map(q => q.num2);
+    const ordered = Array.from({ length: 20 }, (_, i) => i + 1);
+    assert.ok(questions.every(q => q.num1 === 7 && q.answer === 7 * q.num2));
+    assert.notDeepEqual(factors, ordered);
+    assert.deepEqual([...factors].sort((a, b) => a - b), ordered);
+});
+
 test('challenge continues with fresh questions when its initial pool is exhausted', () => {
     const f = fixture('js/utils/array-utils.js', 'js/utils/question-generator.js', 'js/features/game-modes.js');
     f.run(`challengeMode.startChallenge([2], 60); challengeMode.currentIndex = challengeMode.questions.length;`);

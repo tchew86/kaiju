@@ -1268,6 +1268,7 @@ function showBattleSetup() {
                     btn.style.color = '#000';
                     btn.style.borderColor = '#00ff00';
                 }
+                btn.setAttribute('aria-pressed', String(selectedTables.includes(table)));
             };
         });
 
@@ -1286,6 +1287,7 @@ function showBattleSetup() {
                     btn.style.background = 'linear-gradient(135deg, #ff00ff, #aa00aa)';
                     btn.style.borderColor = '#ff00ff';
                 }
+                btn.setAttribute('aria-pressed', String(selectedRanges.includes(range)));
             };
         });
     }

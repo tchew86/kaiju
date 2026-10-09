@@ -437,7 +437,7 @@ class PracticeMode {
         }
 
         // Shuffle for variety
-        ArrayUtils.shuffle(this.questions);
+        this.questions = ArrayUtils.shuffle(this.questions);
 
         return this.questions;
     }

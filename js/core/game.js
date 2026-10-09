@@ -725,9 +725,9 @@ function generateQuestions() {
         }
     });
 
-    ArrayUtils.shuffle(questions);
-    const multiply = questions.filter(question => question.operation === 'multiply');
-    const addition = questions.filter(question => question.operation !== 'multiply');
+    const shuffledQuestions = ArrayUtils.shuffle(questions);
+    const multiply = shuffledQuestions.filter(question => question.operation === 'multiply');
+    const addition = shuffledQuestions.filter(question => question.operation !== 'multiply');
     if (multiply.length && addition.length) {
         const balanced = [];
         for (let i = 0; i < Math.max(multiply.length, addition.length); i++) {
@@ -736,7 +736,7 @@ function generateQuestions() {
         }
         return balanced;
     }
-    return questions;
+    return shuffledQuestions;
 }
 
 // Battle Screen Logic
