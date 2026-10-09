@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>KAIJU - Math Battle Arena</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/enhancements.css">
+</head>
+<body>
+    <div id="storage-notice" role="status" hidden></div>
+    <!-- Profile Selection Screen -->
+    <div id="profile-screen" class="screen active">
+        <div class="profile-select-container">
+            <h1 class="game-title">KAIJU</h1>
+            <p class="subtitle" data-i18n="subtitle">MATH BATTLE ARENA</p>
+
+            <div class="profile-selection">
+                <h2 data-i18n="selectProfile">Select Profile</h2>
+                <div id="profile-list" class="profile-list"></div>
+                <div class="new-profile-section">
+                    <input type="text" aria-label="New profile name" id="new-profile-name" placeholder="Enter new profile name" data-i18n-placeholder="newProfileName" maxlength="20" />
+                    <button id="create-profile-btn" class="action-btn" data-i18n="createProfile">CREATE PROFILE</button>
+                </div>
+                <div class="profile-backup-actions">
+                    <button id="export-profiles-btn" class="secondary-btn" data-i18n="exportProfiles">Export profiles</button>
+                    <button id="import-profiles-btn" class="secondary-btn" data-i18n="importProfiles">Import profiles</button>
+                    <input id="import-profiles-file" type="file" accept=".json,application/json" hidden>
+                </div>
+                <p class="profile-backup-help" data-i18n="backupHelp">Download a backup to move your progress to another browser or device. Imported profiles are added without replacing existing ones.</p>
+                <p id="profile-backup-status" role="status"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen">
+        <!-- Top Bar with Profile and Language -->
+        <div class="home-toolbar">
+            <button id="change-profile-btn" data-i18n="changeProfile" style="background: #00ff00; color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">
+                👤 CHANGE PROFILE
+            </button>
+            <select aria-label="Language" id="language-select" style="padding: 8px; border-radius: 5px; font-weight: bold; font-size: 0.9rem;">
+                <option value="en">🇬🇧 EN</option>
+                <option value="nl">🇳🇱 NL</option>
+                <option value="de">🇩🇪 DE</option>
+                <option value="vi">🇻🇳 VI</option>
+            </select>
+        </div>
+
+        <div class="logo-container">
+            <h1 class="game-title">KAIJU</h1>
+            <p class="subtitle" data-i18n="subtitle">MATH BATTLE ARENA</p>
+        </div>
+
+
+        <div class="kaiju-image">
+            <div class="gigarex-sprite" id="start-gigarex"></div>
+            <div class="evolution-stage" id="evolution-stage">BABY GIGAREX</div>
+
+            <!-- Monster Stats Below Image -->
+            <div class="home-player-card">
+                <div style="display: flex; justify-content: space-around; gap: 15px; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                        <div style="color: #aaa; font-size: 0.85rem;" data-i18n="uiLevel">LEVEL</div>
+                        <div style="color: #fff; font-size: 1.3rem; font-weight: bold;" id="player-level">1</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="color: #aaa; font-size: 0.85rem;" data-i18n="uiMaxDmg">⚔️ MAX DMG</div>
+                        <div style="color: #ff6600; font-size: 1.3rem; font-weight: bold;" id="player-power">~50</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="color: #aaa; font-size: 0.85rem;" data-i18n="uiMaxHp">❤️ MAX HP</div>
+                        <div style="color: #ff0000; font-size: 1.3rem; font-weight: bold;" id="player-hp-display">100</div>
+                    </div>
+                </div>
+                <!-- XP Progress Bar -->
+                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #333;">
+                    <div style="background: rgba(0, 0, 0, 0.5); border-radius: 10px; overflow: hidden; height: 20px; position: relative; border: 2px solid #333;">
+                        <div class="level-fill" id="level-fill" style="height: 100%; background: linear-gradient(90deg, #00ff00, #00aa00); transition: width 0.3s ease;"></div>
+                    </div>
+                    <div style="color: #ffaa00; font-size: 0.9rem; text-align: center; margin-top: 5px;">
+                        <span id="current-xp">0</span> / <span id="needed-xp">100</span> XP
+                    </div>
+                    <div style="color: #888; font-size: 0.75rem; text-align: center; margin-top: 3px;">
+                        <span data-i18n="totalXp">Total XP:</span> <span id="total-xp">0</span>
+                    </div>
+                </div>
+
+                <!-- Upgrade System -->
+                <div class="upgrade-section" id="upgrade-section" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #333;">
+                    <div style="text-align: center; margin-bottom: 10px;">
+                        <h3 style="color: #00ff00; margin: 0; font-size: 1.1rem;" data-i18n="upgradesTitle">⚡ UPGRADES ⚡</h3>
+                        <div style="color: #ffaa00; font-size: 0.95rem; font-weight: bold; margin-top: 5px;">
+                            <span id="upgrade-points">0</span> <span data-i18n="pointsAvailable">Points Available</span>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div style="background: rgba(255, 0, 0, 0.1); border: 2px solid #ff0000; border-radius: 8px; padding: 10px; text-align: center;">
+                            <div style="color: #ff0000; font-weight: bold; margin-bottom: 5px;" data-i18n="uiMaxHp">❤️ MAX HP</div>
+                            <div style="color: #aaa; font-size: 0.85rem;"><span data-i18n="levelColon">Level:</span> <span id="hp-level">0</span></div>
+                            <div style="color: #fff; font-size: 0.9rem; margin: 5px 0;">+<span id="hp-bonus">0</span> HP</div>
+                            <button class="upgrade-btn" id="upgrade-hp-btn" data-i18n="upgradeHpBtn" style="background: #ff0000; color: #fff; border: none; padding: 8px 12px; font-size: 0.85rem; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%;">UPGRADE (+20 HP)</button>
+                        </div>
+                        <div style="background: rgba(255, 102, 0, 0.1); border: 2px solid #ff6600; border-radius: 8px; padding: 10px; text-align: center;">
+                            <div style="color: #ff6600; font-weight: bold; margin-bottom: 5px;" data-i18n="uiPower">⚔️ POWER</div>
+                            <div style="color: #aaa; font-size: 0.85rem;"><span data-i18n="levelColon">Level:</span> <span id="power-level">0</span></div>
+                            <div style="color: #fff; font-size: 0.9rem; margin: 5px 0;">+<span id="power-bonus">0</span>% DMG</div>
+                            <button class="upgrade-btn" id="upgrade-power-btn" data-i18n="upgradePowerBtn" style="background: #ff6600; color: #fff; border: none; padding: 8px 12px; font-size: 0.85rem; font-weight: bold; border-radius: 5px; cursor: pointer; width: 100%;">UPGRADE (+15% DMG)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button id="start-battle-btn" class="action-btn" data-i18n="startBattle">START BATTLE!</button>
+
+        <!-- Phase 2: Menu Buttons -->
+        <div class="menu-buttons">
+            <button id="stats-btn" class="secondary-btn" data-i18n="statsBtn">📊 STATS</button>
+            <button id="pokedex-btn" class="secondary-btn" data-i18n="collectionBtn">🦖 COLLECTION</button>
+            <button id="manual-btn" class="secondary-btn" data-i18n="manualBtn">📖 MANUAL</button>
+            <button id="modes-btn" class="secondary-btn" data-i18n="modesBtn">🎮 MODES</button>
+        </div>
+    </div>
+
+    <!-- Battle Intro Screen -->
+    <div id="battle-intro-screen" class="screen">
+        <div class="intro-container">
+            <h1 class="intro-title" data-i18n="wildKaijuAppears">A WILD KAIJU APPEARS!</h1>
+            <div class="enemy-intro">
+                <div class="kaiju-sprite enemy large" id="intro-enemy-sprite"></div>
+                <div class="enemy-intro-name" id="intro-enemy-name">SKYTALON</div>
+                <div class="enemy-stats">
+                    <div class="enemy-stat">
+                        <span class="stat-label" data-i18n="hpColon">HP:</span>
+                        <span id="intro-enemy-hp">100</span>
+                    </div>
+                    <div class="enemy-stat">
+                        <span class="stat-label" data-i18n="levelCapsColon">LEVEL:</span>
+                        <span id="intro-enemy-level">5</span>
+                    </div>
+                    <div class="enemy-stat">
+                        <span class="stat-label" data-i18n="attackColon">⚔️ ATTACK:</span>
+                        <span id="intro-enemy-attack">~30</span>
+                    </div>
+                </div>
+                <!-- Campaign Question Info (hidden for normal battles) -->
+                <div id="campaign-question-info" style="display: none; margin-top: 20px; padding: 15px; background: rgba(255, 0, 255, 0.1); border: 2px solid #ff00ff; border-radius: 10px;">
+                    <div style="color: #ff00ff; font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; text-align: center;" data-i18n="battleParams">📋 BATTLE PARAMETERS</div>
+                    <div style="color: #fff; font-size: 0.95rem; line-height: 1.6;">
+                        <div><strong data-i18n="operationColon">Operation:</strong> <span id="campaign-operation">Multiplication</span></div>
+                        <div><strong data-i18n="tablesColon">Tables:</strong> <span id="campaign-tables">1×, 2×, 3×</span></div>
+                    </div>
+                </div>
+            </div>
+            <button class="action-btn" id="begin-battle-btn" data-i18n="beginBattle">BEGIN BATTLE!</button>
+        </div>
+    </div>
+
+    <!-- Battle Screen -->
+    <div id="battle-screen" class="screen">
+        <div class="battle-arena">
+            <div class="player-kaiju">
+                <div class="kaiju-name">GIGAREX</div>
+                <div class="hp-display">
+                    <div class="hp-label" data-i18n="hpLabel">HP</div>
+                    <div class="hp-bar-container">
+                        <div class="hp-bar player-hp">
+                            <div class="hp-fill" id="player-hp-fill"></div>
+                        </div>
+                        <div class="hp-text"><span id="player-hp">100</span> / <span id="player-max-hp">100</span></div>
+                    </div>
+                </div>
+                <div class="stat-display" style="display: flex; justify-content: center; gap: 15px; margin-top: 5px; font-size: 0.9rem;">
+                    <div style="color: #ff6600;">⚔️ <span id="battle-player-power">+0%</span></div>
+                    <div style="color: #00ff00;">Lvl <span id="battle-player-level">1</span></div>
+                </div>
+                <div class="kaiju-sprite gigarex battle-sprite" id="player-sprite"></div>
+            </div>
+
+            <div class="enemy-kaiju">
+                <div class="kaiju-name" id="enemy-name">SKYTALON</div>
+                <div class="hp-display">
+                    <div class="hp-label" data-i18n="hpLabel">HP</div>
+                    <div class="hp-bar-container">
+                        <div class="hp-bar enemy-hp">
+                            <div class="hp-fill" id="enemy-hp-fill"></div>
+                        </div>
+                        <div class="hp-text"><span id="enemy-hp">100</span> / <span id="enemy-max-hp">100</span></div>
+                    </div>
+                </div>
+                <div class="stat-display" style="display: flex; justify-content: center; gap: 15px; margin-top: 5px; font-size: 0.9rem;">
+                    <div style="color: #ff6600;">⚔️ <span id="battle-enemy-power">×1.0</span></div>
+                    <div style="color: #ffaa00;">Lvl <span id="battle-enemy-level">1</span></div>
+                </div>
+                <div class="kaiju-sprite enemy battle-sprite" id="enemy-sprite"></div>
+            </div>
+        </div>
+
+        <div class="battle-message" id="battle-message"></div>
+        <div class="damage-number" id="damage-number"></div>
+        <div class="combo-display" id="combo-display"></div>
+
+        <!-- Phase 2: Power-up Active Indicator -->
+        <div id="powerup-indicator" style="display: none;"></div>
+
+        <!-- Atomic Breath Charge Bar -->
+        <div id="atomic-breath-bar" style="
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #00ff00;
+            border-radius: 20px;
+            padding: 12px;
+            display: none;
+            z-index: 100;
+        ">
+            <div style="color: #00ff00; font-weight: bold; font-size: 0.9rem; text-align: center; margin-bottom: 8px;" data-i18n="atomicBreathCharging">
+                ⚡ ATOMIC BREATH CHARGING ⚡
+            </div>
+            <div style="
+                background: rgba(0, 0, 0, 0.5);
+                border-radius: 10px;
+                overflow: hidden;
+                height: 20px;
+                position: relative;
+                border: 2px solid #333;
+            ">
+                <div id="atomic-breath-fill" style="
+                    height: 100%;
+                    background: linear-gradient(90deg, #00ff00, #00ffaa);
+                    width: 0%;
+                    transition: width 0.3s ease;
+                    box-shadow: 0 0 10px #00ff00;
+                "></div>
+            </div>
+            <div style="color: #ffaa00; font-size: 0.8rem; text-align: center; margin-top: 5px;">
+                <span id="atomic-breath-count">0</span> / 5 <span data-i18n="superFastAnswers">Super Fast Answers</span>
+            </div>
+        </div>
+
+        <div class="battle-ui">
+            <div class="question-container">
+                <div class="timer-bar">
+                    <div class="timer-fill" id="timer-fill"></div>
+                    <div class="timer-text"><span id="timer-seconds">10</span>s</div>
+                </div>
+                <div class="question" id="question">? × ? = ?</div>
+            </div>
+
+            <div class="answer-input-section">
+                <div class="current-answer-display">
+                    <span class="answer-label" data-i18n="yourAnswer">YOUR ANSWER:</span>
+                    <span class="current-answer" id="current-answer">?</span>
+                </div>
+
+                <div class="answer-grid">
+                    <button class="answer-btn" data-answer="1">1</button>
+                    <button class="answer-btn" data-answer="2">2</button>
+                    <button class="answer-btn" data-answer="3">3</button>
+                    <button class="answer-btn" data-answer="4">4</button>
+                    <button class="answer-btn" data-answer="5">5</button>
+                    <button class="answer-btn" data-answer="6">6</button>
+                    <button class="answer-btn" data-answer="7">7</button>
+                    <button class="answer-btn" data-answer="8">8</button>
+                    <button class="answer-btn" data-answer="9">9</button>
+                    <button aria-label="Delete last digit" class="answer-btn clear-btn" id="clear-btn">⌫</button>
+                    <button class="answer-btn" data-answer="0">0</button>
+                    <button class="answer-btn submit-btn" id="submit-btn" data-i18n="attackBtn">ATTACK!</button>
+                </div>
+
+                <button class="special-attack-btn" id="special-attack-btn" data-i18n="specialAttack" style="display: none;">
+                    ⚡ SPECIAL ATTACK! ⚡
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results-screen" class="screen">
+        <div class="results-container">
+            <h1 class="results-title" id="victory-title">VICTORY!</h1>
+
+            <div class="battle-result-scene">
+                <div style="display: flex; justify-content: space-around; align-items: center; gap: 30px; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                        <div class="kaiju-sprite gigarex victory" id="result-sprite"></div>
+                        <div style="color: #00ff00; font-weight: bold; margin-top: 10px; font-size: 1.1rem;" data-i18n="youLabel">YOU</div>
+                    </div>
+                    <div style="color: #ffaa00; font-size: 3rem; font-weight: bold;">VS</div>
+                    <div style="text-align: center;">
+                        <div class="kaiju-sprite enemy" id="result-enemy-sprite"></div>
+                        <div style="color: #ff6600; font-weight: bold; margin-top: 10px; font-size: 1.1rem;" id="result-enemy-name">ENEMY</div>
+                    </div>
+                </div>
+                <div class="result-message" id="result-message" style="margin-top: 20px;">You defeated the enemy!</div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-item">
+                    <div class="stat-label" data-i18n="damageDealt">Damage Dealt</div>
+                    <div class="stat-value" id="final-score">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" data-i18n="attacksLabel">Attacks</div>
+                    <div class="stat-value"><span id="correct-attacks">0</span>/<span id="total-attacks">0</span></div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" data-i18n="accuracy">Accuracy</div>
+                    <div class="stat-value" id="accuracy">0%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" data-i18n="speed">Avg Speed</div>
+                    <div class="stat-value" id="avg-speed">0s</div>
+                </div>
+            </div>
+
+            <!-- Rank removed per user request -->
+
+            <div class="progression-section">
+                <div class="xp-gained">
+                    <div class="xp-label" data-i18n="xpGainedLabel">XP GAINED:</div>
+                    <div class="xp-value" id="xp-gained">+0</div>
+                </div>
+                <div class="level-up-message" id="level-up-message"></div>
+            </div>
+
+            <button class="action-btn" id="play-again-btn" data-i18n="nextBattle">NEXT BATTLE!</button>
+        </div>
+    </div>
+
+    <!-- Battle History Screen -->
+    <div id="history-screen" class="screen">
+        <div class="history-container">
+            <h1 class="history-title" data-i18n="battleHistoryTitle">BATTLE HISTORY</h1>
+            <div id="history-list" class="history-list"></div>
+            <button class="action-btn" id="back-from-history-btn" data-i18n="backBtn">BACK</button>
+        </div>
+    </div>
+
+    <!-- Battle Detail Screen -->
+    <div id="battle-detail-screen" class="screen">
+        <div class="battle-detail-container">
+            <h1 class="detail-title" data-i18n="battleDetailsTitle">BATTLE DETAILS</h1>
+            <div id="battle-detail-content"></div>
+            <button class="action-btn" id="back-to-history-btn" data-i18n="backToHistory">BACK TO HISTORY</button>
+        </div>
+    </div>
+
+    <!-- Utilities (load first to avoid dependency issues) -->
+    <script src="js/utils/storage-utils.js"></script>
+    <script src="js/utils/array-utils.js"></script>
+    <script src="js/utils/question-generator.js"></script>
+    <script src="js/utils/keyboard-handler.js"></script>
+    <script src="js/utils/ui-components.js"></script>
+
+    <!-- Core Systems -->
+    <script src="js/core/translations.js"></script>
+    <script src="js/core/menu-translations.js"></script>
+    <script src="js/core/sounds.js"></script>
+
+    <!-- Game Features -->
+    <script src="js/features/achievements.js"></script>
+    <script src="js/features/analytics.js"></script>
+    <script src="js/features/hints.js"></script>
+    <script src="js/features/game-modes.js"></script>
+    <script src="js/features/powerups.js"></script>
+
+    <!-- UI Components -->
+    <script src="js/ui/visual-aids.js"></script>
+    <script src="js/ui/stats-screen.js"></script>
+    <script src="js/ui/recommendations-widget.js"></script>
+    <script src="js/ui/enemy-pokedex.js"></script>
+    <script src="js/ui/practice-ui.js"></script>
+    <script src="js/ui/challenge-ui.js"></script>
+
+    <!-- Core Game Engine (must load after all systems) -->
+    <script src="js/core/game.js"></script>
+
+    <script src="js/ui/profile-backup.js"></script>
+
+    <!-- Integration Layer (must load last) -->
+    <script src="js/ui/game-integration.js"></script>
+</body>
+</html>

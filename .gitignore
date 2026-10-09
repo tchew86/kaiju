@@ -1,0 +1,26 @@
+# Dropbox metadata sidecars
+*:com.dropbox.attrs
+
+# Editor/Dropbox temp files
+*.tmp.*
+*.tmp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor dirs
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+node_modules/
+__pycache__/
+artifacts/
+
+# Private local settings and internal asset notes
+/.claude/settings.local*.json
+/docs/ASSET_REPLACEMENT_MANIFEST.md

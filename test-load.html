@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>KAIJU — Startup Check</title>
+    <style>
+        body { font: 16px system-ui; margin: 24px; background: #10151e; color: #eee; }
+        iframe { width: 100%; height: 70vh; border: 1px solid #547; border-radius: 12px; }
+        .error { color: #ffaaaa; }
+    </style>
+</head>
+<body>
+    <h1>KAIJU startup check</h1>
+    <p>This loads the actual game with its own DOM and script order.</p>
+    <p id="status" role="status">Loading…</p>
+    <ul id="errors" class="error"></ul>
+    <iframe id="game" title="Kaiju game preview"></iframe>
+    <script>
+        const frame = document.getElementById('game');
+        const status = document.getElementById('status');
+        const errors = document.getElementById('errors');
+        function reportError(message) {
+            const item = document.createElement('li');
+            item.textContent = message;
+            errors.appendChild(item);
+            status.textContent = 'Startup failed — see errors below.';
+        }
+        window.addEventListener('message', event => {
+            if (event.source === frame.contentWindow && event.data?.type === 'kaiju-startup-error') {
+                reportError(event.data.message);
+            }
+        });
+        frame.addEventListener('load', () => {
+            if (!frame.contentDocument?.getElementById('profile-screen')) return;
+            const active = frame.contentDocument.querySelector('.screen.active');
+            if (!active) reportError('No active game screen.');
+            if (!errors.children.length) status.textContent = 'Game loaded. Try profile creation, battle, practice, and challenge below.';
+        });
+        fetch('index.html').then(response => {
+            if (!response.ok) throw new Error('Could not load index.html.');
+            return response.text();
+        }).then(html => {
+            // Capture startup errors before any production scripts execute.
+            const capture = `<script>
+                function report(message) {
+                    parent.postMessage({type: 'kaiju-startup-error', message: String(message)}, '*');
+                }
+                window.addEventListener('error', event => report(event.message || 'Asset failed to load'), true);
+                window.addEventListener('unhandledrejection', event => report(event.reason));
+            <\/script>`;
+            frame.srcdoc = html.replace('<head>', '<head>' + capture);
+        }).catch(error => reportError(error.message + ' Serve this folder over HTTP to run diagnostics.'));
+    </script>
+</body>
+</html>
